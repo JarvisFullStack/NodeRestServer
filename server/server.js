@@ -10,7 +10,7 @@ const bodyParser = require('body-parser');
 //middlewars: se disparan cuando se realiza una peticion.
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(bodyParser.json());
-app.use( require('./routes/usuario.js') );
+app.use( require('./routes/index') );
 
 
 
