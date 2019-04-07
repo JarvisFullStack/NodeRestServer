@@ -5,12 +5,18 @@ const bcrypt = require('bcrypt');
 const _ = require('underscore');
 
 const Usuario = require('../models/usuario');
+const {verificaToken, verificaAdminRole} = require('../middlewares/autenticacion');
 
 const app = express();
 
 
-
-app.get('/usuario', (req, res) => {
+//                 middleware
+app.get('/usuario', verificaToken, (req, res) => {
+    // return res.json({
+    //     usuario: req.usuario,
+    //     nombre: req.usuario.nombre,
+    //     email: req.usuario.email,
+    // });
    let desde = req.query.desde || 0;
    let limite = req.query.limite || 5; 
     Usuario.find({estado: true}, 'nombre email role estado google img')
@@ -41,7 +47,7 @@ app.get('/usuario', (req, res) => {
             });
 });
 
-app.post('/usuario', (req, res) => {
+app.post('/usuario', [verificaToken, verificaAdminRole], (req, res) => {
     //crear nuevos registros
     let body = req.body;
     let usuario = new Usuario({
@@ -69,16 +75,12 @@ app.post('/usuario', (req, res) => {
     
 });
 
-app.put('/usuario/:id', (req, res) => {
+app.put('/usuario/:id', [verificaToken, verificaAdminRole], (req, res) => {
     //actualizar registros
     let id = req.params.id;
     let body = _.pick(req.body, ['nombre', 'email', 'img', 'role', 'estado']);
     
-    /*let usuario = new Usuario({
-        nombre: body.nombre,
-        email: body.email,
-        role: body.role
-    }); */ 
+   
 
     Usuario.findByIdAndUpdate(id, body, {new: true, runValidators: true}, (err, usuarioDB) => {
         if(err) {
@@ -97,7 +99,7 @@ app.put('/usuario/:id', (req, res) => {
     
 });
 
-app.delete('/usuario/:id', (req, res) => {
+app.delete('/usuario/:id', [verificaToken, verificaAdminRole], (req, res) => {
     let id = req.params.id;
     Usuario.findByIdAndUpdate(id, {estado: false}, (err, updatedUser) => {
         if(err) {
